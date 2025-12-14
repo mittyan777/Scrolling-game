@@ -8,6 +8,8 @@ TagManager:
   - hit
   - Floor
   - goal
+  - Move_Floor
+  - start_trigger
   layers:
   - Default
   - TransparentFX

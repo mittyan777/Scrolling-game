@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Player_controller : MonoBehaviour
 {
@@ -11,7 +12,14 @@ public class Player_controller : MonoBehaviour
     public static int HP = 3;
     Animator animator;
     bool control = true;
+    bool jump_flag = false;
     [SerializeField] GameObject goal_text;
+    [SerializeField] GameObject camera;
+    [SerializeField] TextMeshProUGUI time_text;
+    [SerializeField] TextMeshProUGUI score_text;
+    float time = 200;
+    float score = 0;
+    [SerializeField] GameObject Title_Reload;
 
     void Start()
     {
@@ -25,42 +33,83 @@ public class Player_controller : MonoBehaviour
 
         if (control == true)
         {
-            if (Input.GetKey("d"))
+            if (camera_control.Title == false && camera.GetComponent<Camera>().orthographicSize >= 5)
             {
-                animator.SetBool("Run", true);
-                GetComponent<SpriteRenderer>().flipX = false;
-                if (speed <= 5)
+                if (Input.GetKey("d"))
                 {
-                    speed += 8 * Time.deltaTime;
+                    animator.SetBool("Run", true);
+                    GetComponent<SpriteRenderer>().flipX = false;
+                    if (speed <= 5)
+                    {
+                        speed += 8 * Time.deltaTime;
+                    }
                 }
-            }
-            else if (Input.GetKey("a"))
-            {
-                animator.SetBool("Run", true);
-                GetComponent<SpriteRenderer>().flipX = true;
-                if (speed >= -5)
+                else if (Input.GetKey("a"))
                 {
-                    speed -= 8 * Time.deltaTime;
-                }
-            }
-            else
-            {
-                if (speed > 0.1f)
-                {
-                    speed -= 8 * Time.deltaTime;
-                }
-                else if (speed < -0.1f)
-                {
-                    speed += 8 * Time.deltaTime;
+                    animator.SetBool("Run", true);
+                    GetComponent<SpriteRenderer>().flipX = true;
+                    if (speed >= -5)
+                    {
+                        speed -= 8 * Time.deltaTime;
+                    }
                 }
                 else
                 {
-                    speed = 0;
+                    if (speed > 0.1f)
+                    {
+                        speed -= 8 * Time.deltaTime;
+                    }
+                    else if (speed < -0.1f)
+                    {
+                        speed += 8 * Time.deltaTime;
+                    }
+                    else
+                    {
+                        speed = 0;
+                    }
+                }
+            }
+            else if(camera_control.Title == true)
+            {
+                if (Input.GetKey("d"))
+                {
+                    animator.SetBool("Run", true);
+                    GetComponent<SpriteRenderer>().flipX = false;
+                    if (speed <= 5)
+                    {
+                        speed += 8 * Time.deltaTime;
+                    }
+                }
+                else if (Input.GetKey("a"))
+                {
+                    animator.SetBool("Run", true);
+                    GetComponent<SpriteRenderer>().flipX = true;
+                    if (speed >= -5)
+                    {
+                        speed -= 8 * Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    if (speed > 0.1f)
+                    {
+                        speed -= 8 * Time.deltaTime;
+                    }
+                    else if (speed < -0.1f)
+                    {
+                        speed += 8 * Time.deltaTime;
+                    }
+                    else
+                    {
+                        speed = 0;
+                    }
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) && jump_flag == false)
             {
+                jump_flag = true;
+                animator.SetBool("jump", true);
                 rigidbody2D.AddForce(new Vector2(0f, 600f));
             }
 
@@ -103,16 +152,27 @@ public class Player_controller : MonoBehaviour
 
         if (transform.position.y <= -10)
         {
-            if (HP > 0)
+            if (HP >= 1)
             {
                 HP -= 1;
                 SceneManager.LoadScene("Lives");
             }
-            else
+            if(HP == 0)
             {
-                SceneManager.LoadScene("Lives");
+               Debug.Log("GameOver");
+                SceneManager.LoadScene("gameover");
             }
         }
+        if (camera_control.Title == false)
+        {
+            time -= Time.deltaTime;
+        }
+        time_text.text = "Time: " + ((int)time).ToString();
+        score_text.text = "SCORE: " + ((int)score).ToString();
+        time_text.GetComponent<TextMeshProUGUI>().outlineColor = new Color(255, 255, 255, 255);
+        score_text.GetComponent<TextMeshProUGUI>().outlineColor = new Color(255, 255, 255, 255);
+        
+
 
         transform.position += transform.right * speed * Time.deltaTime;
         transform.localRotation = Quaternion.Euler(0, 0, 0);
@@ -135,6 +195,11 @@ public class Player_controller : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.gameObject.tag == "Floor")
+        {
+            jump_flag = false;
+            animator.SetBool("jump", false);
+        }
         if (collision.gameObject.tag == "Enemy")
         {
             control = false;
@@ -147,17 +212,24 @@ public class Player_controller : MonoBehaviour
 
         if (collision.gameObject.tag == "hit")
         {
+            if (camera_control.Title == false)
+            {
+                score += Random.Range(10, 30);
+            }
             rigidbody2D.AddForce(new Vector2(0f, 600f));
             Destroy(collision.transform.parent.gameObject);
         }
-        if (collision.gameObject.tag == "Floor")
+        if (collision.gameObject.tag == "Move_Floor")
         {
+            jump_flag = false;
+            animator.SetBool("jump", false);
             this.gameObject.transform.parent = collision.gameObject.transform;
         }
+       
     }
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Floor")
+        if (collision.gameObject.tag == "Move_Floor")
         {
             this.gameObject.transform.parent = null;
         }
@@ -167,6 +239,19 @@ public class Player_controller : MonoBehaviour
         if (collision.gameObject.tag == "goal")
         {
             goal_text.SetActive(true);
+            Title_Reload.SetActive(true);
         }
+        if (collision.gameObject.tag == "start_trigger")
+        {
+            speed = 0;
+            collision.GetComponent<BoxCollider2D>().enabled = false;
+            camera_control.Title = false;
+        }
+    }
+    public void Restart()
+    {
+        camera_control.Title = true;
+        HP = 3;
+        SceneManager.LoadScene("stage1-1");
     }
 }
