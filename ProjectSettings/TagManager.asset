@@ -10,6 +10,7 @@ TagManager:
   - goal
   - Move_Floor
   - start_trigger
+  - score_item
   layers:
   - Default
   - TransparentFX

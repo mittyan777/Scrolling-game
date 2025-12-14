@@ -17,6 +17,7 @@ public class Player_controller : MonoBehaviour
     [SerializeField] GameObject camera;
     [SerializeField] TextMeshProUGUI time_text;
     [SerializeField] TextMeshProUGUI score_text;
+    [SerializeField] GameObject Explosion;
     float time = 200;
     float score = 0;
     [SerializeField] GameObject Title_Reload;
@@ -113,6 +114,7 @@ public class Player_controller : MonoBehaviour
                 rigidbody2D.AddForce(new Vector2(0f, 600f));
             }
 
+           
             
             SpriteRenderer sr = GetComponent<SpriteRenderer>();
             Vector2 rayDir = sr.flipX ? Vector2.left : Vector2.right;
@@ -143,6 +145,14 @@ public class Player_controller : MonoBehaviour
                 }
             }
            
+        }
+
+        if (camera_control.Title == false)
+        {
+            if (GameObject.FindWithTag("start_trigger") != null)
+            {
+                GameObject.FindWithTag("start_trigger").GetComponent<BoxCollider2D>().enabled = false;
+            }
         }
 
         if (speed == 0)
@@ -203,10 +213,16 @@ public class Player_controller : MonoBehaviour
         if (collision.gameObject.tag == "Enemy")
         {
             control = false;
-            speed = 0;
-            Vector3 diff = transform.position - collision.transform.position;
-            distance = diff.x;
-            rigidbody2D.AddForce(new Vector2(distance * 200, 400f));
+            speed = 0; 
+
+            Transform firstChild = collision.transform.GetChild(0);
+            Destroy(firstChild.gameObject);
+            if (jump_flag == false)
+            {
+                Vector3 diff = transform.position - collision.transform.position;
+                distance = diff.x;
+                rigidbody2D.AddForce(new Vector2(distance * 200, 400f));
+            }
             GetComponent<BoxCollider2D>().enabled = false;
         }
 
@@ -216,8 +232,11 @@ public class Player_controller : MonoBehaviour
             {
                 score += Random.Range(10, 30);
             }
+            Instantiate(Explosion, collision.gameObject.transform.position, Quaternion.identity);
             rigidbody2D.AddForce(new Vector2(0f, 600f));
+            
             Destroy(collision.transform.parent.gameObject);
+           
         }
         if (collision.gameObject.tag == "Move_Floor")
         {
@@ -225,6 +244,7 @@ public class Player_controller : MonoBehaviour
             animator.SetBool("jump", false);
             this.gameObject.transform.parent = collision.gameObject.transform;
         }
+
        
     }
     private void OnCollisionExit2D(Collision2D collision)
@@ -246,6 +266,14 @@ public class Player_controller : MonoBehaviour
             speed = 0;
             collision.GetComponent<BoxCollider2D>().enabled = false;
             camera_control.Title = false;
+        }
+        if (collision.gameObject.tag == "score_item")
+        {
+            if (camera_control.Title == false)
+            {
+                score += Random.Range(30, 60);
+                Destroy(collision.gameObject);
+            }
         }
     }
     public void Restart()
