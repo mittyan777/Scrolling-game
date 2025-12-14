@@ -11,6 +11,7 @@ public class Player_controller : MonoBehaviour
     public static int HP = 3;
     Animator animator;
     bool control = true;
+    [SerializeField] GameObject goal_text;
 
     void Start()
     {
@@ -114,6 +115,8 @@ public class Player_controller : MonoBehaviour
         }
 
         transform.position += transform.right * speed * Time.deltaTime;
+        transform.localRotation = Quaternion.Euler(0, 0, 0);
+        transform.localScale = new Vector3(1,1,1);
     }
 
     void OnDrawGizmos()
@@ -144,8 +147,26 @@ public class Player_controller : MonoBehaviour
 
         if (collision.gameObject.tag == "hit")
         {
-            rigidbody2D.AddForce(new Vector2(0f, 300f));
+            rigidbody2D.AddForce(new Vector2(0f, 600f));
             Destroy(collision.transform.parent.gameObject);
+        }
+        if (collision.gameObject.tag == "Floor")
+        {
+            this.gameObject.transform.parent = collision.gameObject.transform;
+        }
+    }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Floor")
+        {
+            this.gameObject.transform.parent = null;
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "goal")
+        {
+            goal_text.SetActive(true);
         }
     }
 }

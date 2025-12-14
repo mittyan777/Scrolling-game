@@ -12,7 +12,7 @@ public class camera_control : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Player.transform.position.x >= 0 && Player.transform.position.x <= 100)
+        if (Player.transform.position.x >= 0 && Player.transform.position.x <= 128)
         {
             transform.position = new Vector3(Player.transform.position.x, 0, -10);
         }
