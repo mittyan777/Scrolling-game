@@ -10,9 +10,7 @@ public class camera_control : MonoBehaviour
     {
         
     }
-
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
         if (Title == false)
         {
@@ -26,6 +24,7 @@ public class camera_control : MonoBehaviour
             }
             if (GetComponent<Camera>().orthographicSize >= 5)
             {
+                GetComponent<Camera>().orthographicSize = 5;
                 if (Player.transform.position.x >= 0 && Player.transform.position.x <= 128)
                 {
                     transform.position = new Vector3(Player.transform.position.x, 0, -10);
@@ -34,22 +33,37 @@ public class camera_control : MonoBehaviour
         }
         else
         {
-                GetComponent<Camera>().orthographicSize = 2;
+            GetComponent<Camera>().orthographicSize = 2;
             transform.position = new Vector3(-5.24f, -3.3f, -10);
         }
-     
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        if (Title == false)
+        {
+            if (GetComponent<Camera>().orthographicSize >= 5)
+            {
+                GetComponent<Camera>().orthographicSize = 5;
+                if (Player.transform.position.x >= 0 && Player.transform.position.x <= 128)
+                {
+                    transform.position = new Vector3(Player.transform.position.x, 0, -10);
+                }
+            }
+        }
+
 
     }
     IEnumerator SlowLoop()
     {
-        while (GetComponent<Camera>().orthographicSize <= 5)
+        while (GetComponent<Camera>().orthographicSize < 5)
         {
             
-                GetComponent<Camera>().orthographicSize += 3.5f * Time.deltaTime;
+                GetComponent<Camera>().orthographicSize += 2.5f * Time.deltaTime;
             
 
             // 0.5•b‘Ò‚Â
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSeconds(0.001f);
         }
 
     }
@@ -57,8 +71,8 @@ public class camera_control : MonoBehaviour
     {
         while (transform.position != new Vector3(0, 0, -10))
         {
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(0, 0, -10), 10 * Time.deltaTime);
-            yield return new WaitForSeconds(0.01f);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(0, 0, -10), 6 * Time.deltaTime);
+            yield return new WaitForSeconds(0.001f);
         }
 
     }
